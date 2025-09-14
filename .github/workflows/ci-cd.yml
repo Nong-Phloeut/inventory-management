@@ -42,10 +42,8 @@ jobs:
           cp .env.example backend/.env
           sed -i "s/^DB_USERNAME=.*/DB_USERNAME=root/" backend/.env
           sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=root/" backend/.env
-          # sed -i "s/^APP_KEY=.*/APP_KEY=${{ secrets.APP_KEY }}/" backend/.env
           sed -i "s/^DB_HOST=.*/DB_HOST=db/" backend/.env
-          php artisan key:generate --force
-        working-directory: ./backend
+        working-directory: ./   # <-- run from repo root
 
       - name: Wait for MySQL
         run: |
