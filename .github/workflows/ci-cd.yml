@@ -23,11 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Debug backend folder
-        run: |
-          echo "Current dir: $(pwd)"
-          ls -la ./backend
-
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with: { php-version: '8.2', extensions: mbstring, pdo_mysql }
@@ -35,6 +30,12 @@ jobs:
       - name: Install composer deps
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
         working-directory: ./backend
+
+
+      - name: Debug backend folder
+        run: |
+          echo "Current dir: $(pwd)"
+          ls -la ./backend
 
       - name: Prepare backend env
         run: |
