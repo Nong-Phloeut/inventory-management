@@ -39,11 +39,10 @@ jobs:
 
       - name: Prepare backend env
         run: |
-          cp .env.example backend/.env
-          sed -i "s/^DB_USERNAME=.*/DB_USERNAME=root/" backend/.env
-          sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=root/" backend/.env
-          # sed -i "s/^APP_KEY=.*/APP_KEY=${{ secrets.APP_KEY }}/" backend/.env
-          sed -i "s/^DB_HOST=.*/DB_HOST=db/" backend/.env
+          cp .env.example .env
+          sed -i "s/^DB_USERNAME=.*/DB_USERNAME=root/" .env
+          sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=root/" .env
+          sed -i "s/^DB_HOST=.*/DB_HOST=db/" .env
           php artisan key:generate --force
         working-directory: ./backend
 
