@@ -1,0 +1,181 @@
+<template>
+  <v-container fluid class="pa-0">
+    <custom-title icon="mdi-view-dashboard">Inventory Dashboard</custom-title>
+
+    <!-- Top Cards -->
+    <v-row class="mb-6" dense>
+      <v-col v-for="card in cards" :key="card.title" cols="12" sm="6" md="3">
+        <v-card class="pa-6" :elevation="4">
+          <v-row align="center">
+            <v-col cols="8">
+              <div class="text-subtitle-1">{{ card.title }}</div>
+              <div class="text-h4 font-weight-bold mt-1">{{ card.value }}</div>
+            </v-col>
+            <v-col cols="4" class="text-right">
+              <v-icon size="48" :color="card.color">{{ card.icon }}</v-icon>
+            </v-col>
+          </v-row>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Charts & Tables -->
+    <v-row dense>
+      <!-- Stock by Category Chart -->
+      <v-col cols="12" md="6">
+        <v-card :elevation="4" class="pa-6">
+          <h3 class="mb-4">Stock by Category</h3>
+          <div style="height: 275px;">
+            <canvas ref="barChartCanvas"></canvas>
+          </div>
+        </v-card>
+      </v-col>
+
+      <!-- Low Stock Table with Search -->
+      <v-col cols="12" md="6">
+        <v-card :elevation="4" class="pa-6">
+          <h3 class="mb-4">Low Stock Items</h3>
+          <v-text-field
+            v-model="search"
+            label="Search"
+            prepend-inner-icon="mdi-magnify"
+            single-line
+            variant="solo"
+            density="compact"
+          ></v-text-field>
+          <v-data-table
+            :items="filteredLowStockItems"
+            :headers="tableHeaders"
+            :search="search"
+            hide-default-footer
+          ></v-data-table>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <!-- Quick Actions -->
+    <v-row class="mt-6 mb-5" dense>
+      <v-col cols="12">
+        <v-card :elevation="4" class="pa-6">
+          <h3 class="mb-4">Quick Actions</h3>
+          <v-btn color="primary" class="mr-4" prepend-icon="mdi-plus-circle">
+            Add New Product
+          </v-btn>
+          <v-btn color="success" class="mr-4" prepend-icon="mdi-truck-fast">
+            Add Stock
+          </v-btn>
+          <v-btn color="info" prepend-icon="mdi-file-chart">
+            Generate Report
+          </v-btn>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import Chart from 'chart.js/auto'
+
+const totalProducts = 1200
+const inStock = 950
+const lowStock = 20
+
+// Chart Ref
+const barChartCanvas = ref(null)
+let barChartInstance = null
+
+const cards = ref([
+  { title: 'Total Products', value: totalProducts, icon: 'mdi-cube-outline', color: 'blue-grey' },
+  { title: 'In Stock', value: inStock, icon: 'mdi-warehouse', color: 'success' },
+  { title: 'Low Stock', value: lowStock, icon: 'mdi-alert-circle-outline', color: 'warning' },
+  { title: 'Suppliers', value: 35, icon: 'mdi-truck', color: 'purple' }
+])
+
+const lowStockItems = ref([
+  { name: 'Product A', stock: 3, category: 'Electronics' },
+  { name: 'Product B', stock: 2, category: 'Furniture' },
+  { name: 'Product C', stock: 1, category: 'Stationery' }
+])
+
+const tableHeaders = ref([
+  { title: 'Product', value: 'name' },
+  { title: 'Stock', value: 'stock' },
+  { title: 'Category', value: 'category' }
+])
+
+const stockByCategory = ref({
+  labels: ['Electronics', 'Furniture', 'Stationery'],
+  datasets: [
+    {
+      label: 'Stock',
+      data: [500, 300, 150],
+      backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726'],
+      borderColor: ['#42A5F5', '#66BB6A', '#FFA726'],
+      borderWidth: 1
+    }
+  ]
+})
+
+function renderBarChart() {
+  if (!barChartCanvas.value) return
+  if (barChartInstance) barChartInstance.destroy()
+
+  const ctx = barChartCanvas.value.getContext('2d')
+  barChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: stockByCategory.value, // ✅ Full object with labels & datasets
+    options: {
+      responsive: true,
+      maintainAspectRatio: false, // prevents chart from being too tall
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  })
+}
+
+onMounted(async () => {
+  renderBarChart()
+})
+
+// Search
+const search = ref('')
+const filteredLowStockItems = computed(() => {
+  if (!search.value) return lowStockItems.value
+  const term = search.value.toLowerCase()
+  return lowStockItems.value.filter(
+    i => i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term)
+  )
+})
+</script>
+<style scoped>
+  /* Custom CSS to improve spacing and typography */
+  .v-card {
+    border-radius: 12px;
+    transition: all 0.3s ease-in-out;
+  }
+  .v-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+  }
+  .v-progress-linear {
+    border-radius: 5px;
+  }
+  .v-data-table th {
+    font-weight: bold !important;
+  }
+  .v-btn {
+    text-transform: none;
+    font-weight: 500;
+  }
+  .dashboard-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+    color: #333;
+  }
+  .dashboard-title .v-icon {
+    margin-right: 8px;
+  }
+</style> 
