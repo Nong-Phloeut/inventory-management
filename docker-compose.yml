@@ -22,6 +22,10 @@ services:
         - backend_vendor:/var/www/html/vendor
     networks:
       - app-network
+    command: >
+      sh -c "chown -R www-data:www-data storage bootstrap/cache &&
+           chmod -R 775 storage bootstrap/cache &&
+           php-fpm"
     depends_on:
       # Ensure the database service starts before the backend
       - db

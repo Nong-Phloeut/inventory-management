@@ -31,14 +31,8 @@ COPY composer.json composer.lock ./
 # Copy the rest of the application **before running composer install**
 COPY . .
 
-# Copy .env.example to .env
-RUN cp .env.example .env
-
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Generate application key
-RUN php artisan key:generate
 
 # Fix Laravel storage and cache permissions
 RUN chown -R www-data:www-data storage bootstrap/cache \
