@@ -11,6 +11,7 @@ jobs:
     env:
       IMAGE_BACKEND: ${{ secrets.DOCKER_USERNAME }}/inventory-backend
       IMAGE_FRONTEND: ${{ secrets.DOCKER_USERNAME }}/inventory-frontend
+      IMAGE_WEBSERVER: ${{ secrets.DOCKER_USERNAME }}/inventory-webserver
       IMAGE_TAG: ${{ github.sha }}
 
     steps:
@@ -39,6 +40,16 @@ jobs:
           docker build -t $IMAGE_FRONTEND:latest -t $IMAGE_FRONTEND:$IMAGE_TAG ./frontend
           docker push $IMAGE_FRONTEND:latest
           docker push $IMAGE_FRONTEND:$IMAGE_TAG
+
+            # -------------------
+      # Build & push webserver image (nginx)
+      # -------------------
+      - name: Build & push webserver image
+        run: |
+          docker build -t $IMAGE_WEBSERVER:latest -t $IMAGE_WEBSERVER:$IMAGE_TAG ./backend/nginx
+          docker push $IMAGE_WEBSERVER:latest
+          docker push $IMAGE_WEBSERVER:$IMAGE_TAG
+
 
   deploy:
     runs-on: ubuntu-latest
@@ -81,6 +92,8 @@ jobs:
             # Pull latest images
             docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-backend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-frontend:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-webserver:latest
+
 
             # Stop old containers
             docker compose down || true
