@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
 
       # -------------------
-      # Build & Push Backend
+      # Docker login
       # -------------------
       - name: Docker login
         uses: docker/login-action@v2
@@ -26,6 +26,9 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # -------------------
+      # Build & Push Backend
+      # -------------------
       - name: Build & push backend image
         run: |
           docker build -t $IMAGE_BACKEND:latest -t $IMAGE_BACKEND:$IMAGE_TAG ./backend
@@ -41,8 +44,8 @@ jobs:
           docker push $IMAGE_FRONTEND:latest
           docker push $IMAGE_FRONTEND:$IMAGE_TAG
 
-            # -------------------
-      # Build & push webserver image (nginx)
+      # -------------------
+      # Build & Push Webserver (nginx)
       # -------------------
       - name: Build & push webserver image
         run: |
@@ -58,7 +61,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Remove old docker-compose.yml if exists
+      # Clean old docker-compose.yml and ensure directory
+      - name: Prepare inventory directory
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VM_HOST }}
@@ -68,6 +72,7 @@ jobs:
             rm -rf ~/inventory/docker-compose.yml
             mkdir -p ~/inventory
 
+      # Copy docker-compose.yml
       - name: Copy docker-compose.yml to server
         uses: appleboy/scp-action@master
         with:
@@ -77,7 +82,7 @@ jobs:
           source: "docker-compose.yml"
           target: "~/inventory"
 
-
+      # Deploy
       - name: Deploy to server
         uses: appleboy/ssh-action@v1
         with:
@@ -86,7 +91,6 @@ jobs:
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
             set -e
-            mkdir -p ~/inventory
             cd ~/inventory
 
             # Pull latest images
@@ -94,12 +98,14 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-frontend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-webserver:latest
 
-
             # Stop old containers
             docker compose down || true
 
             # Start containers
-            docker compose up -d
+            docker compose up -d --remove-orphans
 
-            # Run migrations inside backend container
+            # Wait for DB before migrations (10s)
+            sleep 10
+
+            # Run migrations
             docker compose exec -T backend php artisan migrate --force || true
