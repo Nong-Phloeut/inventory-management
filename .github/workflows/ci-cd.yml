@@ -74,10 +74,8 @@ jobs:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          source: "./*"
-          target: "~/inventory/"
-          # The command below is to ensure the scp is recursive
-          rm: true
+          source: "docker-compose.yml"
+          target: "~/inventory"
 
 
       - name: Deploy to server
