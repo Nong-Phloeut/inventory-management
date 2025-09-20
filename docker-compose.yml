@@ -45,8 +45,8 @@ services:
     volumes:
       - /app/node_modules
       - ./frontend:/var/www/html/
-    ports:
-      - "5174:80"
+    # ports:
+    #   - "5174:80"
     networks:
       - app-network
 
