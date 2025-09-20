@@ -31,7 +31,7 @@ jobs:
       # -------------------
       - name: Build & push backend image
         run: |
-          docker build -t $IMAGE_BACKEND:latest -t $IMAGE_BACKEND:$IMAGE_TAG inventory-management/backend
+          docker build -t $IMAGE_BACKEND:latest -t $IMAGE_BACKEND:$IMAGE_TAG ./backend
           docker push $IMAGE_BACKEND:latest
           docker push $IMAGE_BACKEND:$IMAGE_TAG
 
@@ -40,7 +40,7 @@ jobs:
       # -------------------
       - name: Build & push frontend image
         run: |
-          docker build -t $IMAGE_FRONTEND:latest -t $IMAGE_FRONTEND:$IMAGE_TAG inventory-management/frontend
+          docker build -t $IMAGE_FRONTEND:latest -t $IMAGE_FRONTEND:$IMAGE_TAG ./frontend
           docker push $IMAGE_FRONTEND:latest
           docker push $IMAGE_FRONTEND:$IMAGE_TAG
 
@@ -49,7 +49,7 @@ jobs:
       # -------------------
       - name: Build & push webserver image
         run: |
-          docker build -t $IMAGE_WEBSERVER:latest -t $IMAGE_WEBSERVER:$IMAGE_TAG inventory-management/backend/nginx
+          docker build -t $IMAGE_WEBSERVER:latest -t $IMAGE_WEBSERVER:$IMAGE_TAG ./backend/nginx
           docker push $IMAGE_WEBSERVER:latest
           docker push $IMAGE_WEBSERVER:$IMAGE_TAG
 
