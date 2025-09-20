@@ -56,6 +56,7 @@ services:
     build:
       context: ./backend/nginx
       dockerfile: Dockerfile
+    image: nongdev/inventory-webserver:latest
     container_name: inventory_webserver
     restart: unless-stopped
     tty: true
