@@ -20,9 +20,11 @@ services:
     volumes:
         # - ./backend:/var/www/html
         # - backend_vendor:/var/www/html/vendor
-        - ./backend/storage:/var/www/html/storage
-        - ./backend/bootstrap/cache:/var/www/html/bootstrap/cache
+        # - ./backend/storage:/var/www/html/storage
+        # - ./backend/bootstrap/cache:/var/www/html/bootstrap/cache
+        # - backend_vendor:/var/www/html/vendor
         - backend_vendor:/var/www/html/vendor
+        - backend_storage:/var/www/html/storage
     networks:
       - app-network
     command: >
@@ -86,4 +88,5 @@ networks:
 #Docker Volumes
 volumes:
     backend_vendor:
+    backend_storage:
     mysql_data:
