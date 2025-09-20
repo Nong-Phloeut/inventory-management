@@ -19,7 +19,7 @@ RUN npm run build
 FROM nginx:alpine AS production-stage
 
 # Expose default HTTP port
-EXPOSE 80
+EXPOSE 5174
 
 # Create app directory
 RUN mkdir -p /app
