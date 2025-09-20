@@ -17,33 +17,42 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # -------------------
       # Docker login
+      # -------------------
       - name: Docker login
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # -------------------
       # Build & Push Backend
+      # -------------------
       - name: Build & push backend image
         run: |
           docker build -t $IMAGE_BACKEND:latest -t $IMAGE_BACKEND:$IMAGE_TAG backend
           docker push $IMAGE_BACKEND:latest
           docker push $IMAGE_BACKEND:$IMAGE_TAG
 
+      # -------------------
       # Build & Push Frontend
+      # -------------------
       - name: Build & push frontend image
         run: |
           docker build -t $IMAGE_FRONTEND:latest -t $IMAGE_FRONTEND:$IMAGE_TAG frontend
           docker push $IMAGE_FRONTEND:latest
           docker push $IMAGE_FRONTEND:$IMAGE_TAG
 
+      # -------------------
       # Build & Push Webserver (nginx)
+      # -------------------
       - name: Build & push webserver image
         run: |
           docker build -t $IMAGE_WEBSERVER:latest -t $IMAGE_WEBSERVER:$IMAGE_TAG backend/nginx
           docker push $IMAGE_WEBSERVER:latest
           docker push $IMAGE_WEBSERVER:$IMAGE_TAG
+
 
   deploy:
     runs-on: ubuntu-latest
@@ -52,23 +61,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Cleanup old Docker containers, images, volumes
-      - name: Cleanup old Docker on VM
+      # Clean old docker stuff on VM
+      - name: Cleanup old Docker
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          strict: false
           script: |
-            echo ">>> Removing old containers, images, volumes..."
+            echo ">>> Removing all Docker containers, images, networks, and volumes..."
             docker compose down -v --remove-orphans || true
             docker system prune -a -f --volumes || true
-            rm -rf ~/inventory
+
+            rm -rf ~/inventory/docker-compose.yml
             mkdir -p ~/inventory
 
       # Copy docker-compose.yml
-      - name: Copy docker-compose.yml to VM
+      - name: Copy docker-compose.yml to server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.VM_HOST }}
@@ -78,27 +87,26 @@ jobs:
           target: "~/inventory"
 
       # Deploy
-      - name: Deploy containers
+      - name: Deploy to server
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          strict: false
           script: |
             set -e
             cd ~/inventory
 
-            echo ">>> Pulling latest images..."
+            # Pull latest images
             docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-backend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-frontend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-webserver:latest
 
-            echo ">>> Starting containers..."
+            # Start containers fresh
             docker compose up -d --remove-orphans
 
-            echo ">>> Waiting 10s for DB..."
+            # Wait for DB before migrations (10s)
             sleep 10
 
-            echo ">>> Running migrations..."
+            # Run migrations
             docker compose exec -T backend php artisan migrate --force || true
