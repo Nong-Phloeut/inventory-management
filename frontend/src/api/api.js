@@ -2,7 +2,7 @@ import { useLoadingStore } from '@/stores/loading'
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_BASE_URL,
+  baseURL: import.meta.env.VITE_APP_API_BASE_URL || "http://35.239.116.175:82/api",
   headers: {
     'Access-Control-Allow-Origin': '*',
     'Content-type': 'application/json'
