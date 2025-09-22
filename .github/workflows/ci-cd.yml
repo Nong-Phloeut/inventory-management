@@ -105,8 +105,8 @@ jobs:
             # Start containers fresh
             docker compose up -d --remove-orphans
 
-            # Wait for DB before migrations (10s)
-            sleep 10
+            # Wait for DB before migrations (15s)
+            sleep 15
 
             # Run migrations
             docker compose exec backend php artisan migrate --force
