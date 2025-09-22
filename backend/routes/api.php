@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -16,3 +17,4 @@ Route::get('/user', function () {
 });
 
 Route::apiResource('suppliers', SupplierController::class);
+Route::apiResource('categories', CategoryController::class);

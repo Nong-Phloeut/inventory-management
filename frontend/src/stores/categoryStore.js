@@ -1,47 +1,56 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import categoryService from '../api/category'
 
-export const useCategoryStore = defineStore('category', () => {
-  const categories = ref([])
-  const loading = ref(false)
+export const useCategoryStore = defineStore('category', {
+  state: () => ({
+    categories: [],
+    loading: false,
+    error: null
+  }),
 
-  // Fetch all categories
-  const fetchCategories = async () => {
-    loading.value = true
-    try {
-      // Replace this with API call
-      categories.value = [
-        { id: 1, name: 'Beverages', description: 'Soft drinks, water, etc.' },
-        { id: 2, name: 'Snacks', description: 'Chips, biscuits, etc.' }
-      ]
-    } finally {
-      loading.value = false
+  actions: {
+    async fetchCategories() {
+      this.loading = true
+      this.error = null
+      try {
+        const res = await categoryService.getAll()
+        this.categories = res.data
+      } catch (err) {
+        this.error = err.response?.data?.message || err.message
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async addCategory(data) {
+      try {
+        const res = await categoryService.create(data)
+        this.categories.push(res.data)
+      } catch (err) {
+        this.error = err.response?.data?.message || err.message
+        throw err
+      }
+    },
+
+    async updateCategory(id, data) {
+      try {
+        const res = await categoryService.update(id, data)
+        const index = this.categories.findIndex(c => c.id === id)
+        if (index !== -1) this.categories[index] = res.data
+      } catch (err) {
+        this.error = err.response?.data?.message || err.message
+        throw err
+      }
+    },
+
+    async deleteCategory(id) {
+      try {
+        await categoryService.delete(id)
+        this.categories = this.categories.filter(c => c.id !== id)
+      } catch (err) {
+        this.error = err.response?.data?.message || err.message
+        throw err
+      }
     }
-  }
-
-  // Create
-  const addCategory = async (category) => {
-    category.id = Date.now()
-    categories.value.push(category)
-  }
-
-  // Update
-  const updateCategory = async (category) => {
-    const idx = categories.value.findIndex((c) => c.id === category.id)
-    if (idx !== -1) categories.value[idx] = { ...category }
-  }
-
-  // Delete
-  const deleteCategory = async (id) => {
-    categories.value = categories.value.filter((c) => c.id !== id)
-  }
-
-  return {
-    categories,
-    loading,
-    fetchCategories,
-    addCategory,
-    updateCategory,
-    deleteCategory
   }
 })
