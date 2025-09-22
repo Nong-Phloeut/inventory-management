@@ -109,4 +109,5 @@ jobs:
             sleep 10
 
             # Run migrations
-            docker compose exec -T backend php artisan migrate --force || true
+            docker compose exec backend php artisan migrate --force
+            docker compose exec backend php artisan db:seed --force
