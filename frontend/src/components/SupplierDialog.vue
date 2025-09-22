@@ -1,14 +1,31 @@
 <template>
-  <v-dialog v-model="internalOpen" max-width="600">
+  <v-dialog v-model="internalOpen" max-width="800">
     <v-card>
-      <v-card-title>
-        {{ form.id ? 'Edit Supplier' : 'Add Supplier' }}
-      </v-card-title>
+      <v-toolbar
+        :title="form.id ? 'Edit Supplier' : 'Add Supplier'"
+        class="bg-primary"
+      >
+        <v-spacer />
+        <v-btn icon="mdi-close" @click="close"></v-btn>
+      </v-toolbar>
       <v-card-text>
-        <v-text-field v-model="form.name" label="Supplier Name" required />
-        <v-text-field v-model="form.contact" label="Contact Person" />
-        <v-text-field v-model="form.phone" label="Phone" />
-        <v-text-field v-model="form.email" label="Email" type="email" />
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="form.name" label="Supplier Name" required />
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="form.contact_name" label="Contact Person" />
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="form.phone" label="Phone" />
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field v-model="form.email" label="Email" type="email" />
+          </v-col>
+        </v-row>
+        <v-text-field v-model="form.address" label="Address" />
       </v-card-text>
       <v-card-actions>
         <v-spacer />
@@ -30,10 +47,10 @@
 
   const internalOpen = ref(false)
 
-  const form = ref({ id: null, name: '', contact: '', phone: '', email: '' })
-  
+  const form = ref({ id: null, name: '', contact_name: '', phone: '', email: '' })
+
   const resetForm = () => {
-    form.value = { id: null, name: '', contact: '', phone: '', email: '' }
+    form.value = { id: null, name: '', contact_name: '', phone: '', email: '' }
   }
 
   watch(
