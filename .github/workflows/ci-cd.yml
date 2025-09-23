@@ -71,7 +71,7 @@ jobs:
             echo ">>> Removing all Docker containers, images, networks, and volumes..."
             cd ~/inventory || true
             docker compose down -v --remove-orphans || true
-            docker system prune -a -f --volumes || true
+            docker system prune -a -f || true
 
             rm -rf ~/inventory/docker-compose.yml
             mkdir -p ~/inventory
