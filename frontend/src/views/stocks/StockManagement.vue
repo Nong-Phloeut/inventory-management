@@ -1,70 +1,67 @@
 <template>
-    <custom-title icon="mdi-swap-horizontal">Stock Management
+  <custom-title icon="mdi-warehouse">
+    Stocks
     <template #right>
-      <BaseButton icon="mdi-plus" @click="openDialog">
-        Add Movement
+      <BaseButton icon="mdi-plus" @click="openAddDialog">
+        Add Stock
       </BaseButton>
     </template>
   </custom-title>
-  <div>
 
-    <v-data-table
-      :headers="headers"
-      :items="stockMovements"
-      item-key="id"
-    >
-      <template v-slot:item.actions="{ item }">
-        <v-btn icon @click="openDialog(item)">
-          <v-icon>mdi-pencil</v-icon>
-        </v-btn>
-        <v-btn icon color="error" @click="deleteMovement(item.id)">
-          <v-icon>mdi-delete</v-icon>
-        </v-btn>
-      </template>
-    </v-data-table>
+  <v-data-table :headers="headers" :items="stockStore.stocks">
+    <template #item.product="{ item }">
+      {{ item.product?.name }}
+    </template>
+    <template #item.actions="{ item }">
+      <v-btn icon="mdi-pencil" size="small" color="primary" @click="openEditDialog(item)" />
+      <v-btn icon="mdi-delete" size="small" color="error" @click="deleteStock(item)" />
+    </template>
+  </v-data-table>
 
-    <StockMovementDialog
-      v-model="isDialogOpen"
-      :movement="selectedMovement"
-      @save="saveMovement"
-    />
-  </div>
+  <StockDialog
+    v-model:isOpen="isDialogOpen"
+    :stock="selectedStock"
+    :products="productStore.products"
+    @save="saveStock"
+  />
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useStockMovementStore } from '@/stores/stockMovement'
-import StockMovementDialog from '@/components/StockMovementDialog.vue'
+import { ref, onMounted } from 'vue'
+import { useStockStore } from '@/stores/stockStore'
+import { useProductStore } from '@/stores/productStore'
+import StockDialog from '@/components/StockDialog.vue'
 
-const store = useStockMovementStore()
-const isDialogOpen = ref(false)
-const selectedMovement = ref(null)
+const stockStore = useStockStore()
+const productStore = useProductStore()
 
 const headers = [
-  { title: 'Product', key: 'productName' },
-  { title: 'Type', key: 'type' },
+  { title: 'Product', key: 'product' },
   { title: 'Quantity', key: 'quantity' },
-  { title: 'Date', key: 'date' },
   { title: 'Actions', key: 'actions', sortable: false }
 ]
 
-const stockMovements = computed(() => store.stockMovements)
+const isDialogOpen = ref(false)
+const selectedStock = ref(null)
 
-const openDialog = (movement = null) => {
-  selectedMovement.value = movement ? { ...movement } : null
+onMounted(() => {
+  stockStore.fetchStocks()
+  productStore.fetchProducts()
+})
+
+const openAddDialog = () => {
+  selectedStock.value = null
   isDialogOpen.value = true
 }
-
-const saveMovement = (movement) => {
-  if (movement.id) {
-    store.updateMovement(movement)
-  } else {
-    store.addMovement(movement)
-  }
-  isDialogOpen.value = false
+const openEditDialog = s => {
+  selectedStock.value = { ...s }
+  isDialogOpen.value = true
 }
-
-const deleteMovement = (id) => {
-  store.deleteMovement(id)
+const saveStock = s => {
+  s.id ? stockStore.updateStock(s) : stockStore.addStock(s)
+  stockStore.fetchStocks()
+}
+const deleteStock = s => {
+  if (confirm(`Delete stock of "${s.product.name}"?`)) stockStore.deleteStock(s.id)
 }
 </script>

@@ -1,110 +1,107 @@
 <template>
-  <v-dialog
-    :model-value="isOpen"
-    @update:model-value="emit('update:isOpen', $event)"
-    max-width="600"
-  >
+  <v-dialog v-model="internalOpen" max-width="600">
     <v-card>
       <v-card-title>
-        <span class="text-h6">
-          {{ product?.id ? 'Edit Product' : 'Add Product' }}
-        </span>
+        {{ form.id ? 'Edit Product' : 'Add Product' }}
       </v-card-title>
 
       <v-card-text>
-        <v-form ref="formRef" v-model="isFormValid">
+        <v-form ref="formRef" v-model="isValid">
           <v-text-field
             v-model="form.name"
-            label="Product Name"
-            :rules="[v => !!v || 'Name is required']"
+            label="Name"
+            :rules="[rules.required]"
             required
           />
-          <v-text-field
-            v-model="form.sku"
-            label="SKU"
-            :rules="[v => !!v || 'SKU is required']"
-            required
+          <v-select
+            v-model="form.category_id"
+            :items="categoryStore.categories"
+            item-title="name"
+            item-value="id"
+            label="Category"
+            :rules="[rules.required]"
           />
-          <v-text-field
-            v-model="form.stock"
-            type="number"
-            label="Stock Quantity"
-            :rules="[v => v >= 0 || 'Stock must be >= 0']"
-            required
-          />
-          <v-text-field
-            v-model="form.price"
-            type="number"
-            label="Price"
-            prefix="$"
-            :rules="[v => v > 0 || 'Price must be > 0']"
-            required
-          />
+          <v-text-field v-model="form.sku" label="SKU" />
+          <v-text-field v-model="form.stock" label="Stock" type="number" />
+          <v-text-field v-model="form.price" label="Price" type="number" />
         </v-form>
       </v-card-text>
 
       <v-card-actions>
         <v-spacer />
         <v-btn text @click="close">Cancel</v-btn>
-        <v-btn
-          color="primary"
-          :disabled="!isFormValid"
-          @click="handleSave"
-        >
-          Save
-        </v-btn>
+        <v-btn color="primary" :disabled="!isValid" @click="submit">Save</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+  import { ref, watch, onMounted } from 'vue'
+  import { useCategoryStore } from '@/stores/categoryStore'
+  const categoryStore = useCategoryStore()
 
-const props = defineProps({
-  isOpen: { type: Boolean, default: false },
-  product: { type: Object, default: null },
-})
+  const props = defineProps({
+    isOpen: Boolean,
+    product: { type: Object, default: null }
+  })
+  const emit = defineEmits(['update:isOpen', 'save'])
 
-const emit = defineEmits(['update:isOpen', 'save'])
+  const internalOpen = ref(false)
+  const formRef = ref(null)
+  const isValid = ref(false)
 
-const formRef = ref(null)
-const isFormValid = ref(false)
+  const form = ref({
+    id: null,
+    name: '',
+    sku: '',
+    stock: 0,
+    price: 0
+  })
 
-const form = reactive({
-  id: null,
-  name: '',
-  sku: '',
-  stock: 0,
-  price: 0,
-})
+  const rules = {
+    required: v => !!v || 'This field is required'
+  }
 
-const resetForm = () => {
-  form.id = null
-  form.name = ''
-  form.sku = ''
-  form.stock = 0
-  form.price = 0
-}
+  // 🔄 Sync with parent
+  watch(
+    () => props.isOpen,
+    val => {
+      internalOpen.value = val
+      if (val) {
+        // opening dialog → load product if editing, otherwise reset
+        if (props.product) {
+          form.value = { ...props.product }
+        } else {
+          resetForm()
+        }
+      }
+    },
+    { immediate: true }
+  )
 
-watch(
-  () => props.product,
-  (newVal) => {
-    if (newVal) {
-      Object.assign(form, newVal)
-    } else {
-      resetForm()
+  // 🔄 Emit back
+  watch(internalOpen, val => emit('update:isOpen', val))
+
+  // 🧹 Reset form
+  const resetForm = () => {
+    form.value = { id: null, name: '', sku: '', stock: 0, price: 0 }
+    isValid.value = false
+    formRef.value?.resetValidation()
+  }
+
+  const close = () => {
+    internalOpen.value = false
+    resetForm()
+  }
+
+  const submit = async () => {
+    const ok = await formRef.value?.validate()
+    if (ok) {
+      emit('save', { ...form.value })
+      close() // close & reset after successful save
     }
-  },
-  { immediate: true }
-)
+  }
 
-const close = () => {
-  emit('update:isOpen', false)
-}
-
-const handleSave = () => {
-  if (!formRef.value?.validate()) return
-  emit('save', { ...form })
-}
+  onMounted(() => categoryStore.fetchCategories())
 </script>

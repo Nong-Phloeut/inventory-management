@@ -1,44 +1,54 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { productService } from '../api/product'
 
-export const useProductStore = defineStore('product', () => {
-  const products = ref([
-    { id: 1, name: 'Laptop', sku: 'LTP-001', stock: 20, price: 1200 },
-    { id: 2, name: 'Keyboard', sku: 'KBD-101', stock: 50, price: 40 },
-  ])
+export const useProductStore = defineStore('product', {
+  state: () => ({
+    products: [],
+    loading: false,
+    error: null
+  }),
 
-  let nextId = 3
+  actions: {
+    async fetchProducts() {
+      this.loading = true
+      try {
+        this.products = await productService.getAll()
+      } catch (err) {
+        this.error = err.response?.data?.message || err.message
+      } finally {
+        this.loading = false
+      }
+    },
 
-  const fetchProducts = async () => {
-    // TODO: Replace with API call
-    // const { data } = await axios.get('/api/products')
-    // products.value = data
-  }
+    async addProduct(product) {
+      try {
+        const newProduct = await productService.create(product)
+        this.products.push(newProduct)
+      } catch (err) {
+        this.error = err.response?.data?.message || err.message
+        throw err
+      }
+    },
 
-  const addProduct = async (product) => {
-    // TODO: Replace with API POST
-    product.id = nextId++
-    products.value.push(product)
-  }
+    async updateProduct(product) {
+      try {
+        const updated = await productService.update(product.id, product)
+        const idx = this.products.findIndex(p => p.id === product.id)
+        if (idx !== -1) this.products[idx] = updated
+      } catch (err) {
+        this.error = err.response?.data?.message || err.message
+        throw err
+      }
+    },
 
-  const updateProduct = async (product) => {
-    // TODO: Replace with API PUT
-    const index = products.value.findIndex((p) => p.id === product.id)
-    if (index !== -1) {
-      products.value[index] = { ...product }
+    async deleteProduct(id) {
+      try {
+        await productService.remove(id)
+        this.products = this.products.filter(p => p.id !== id)
+      } catch (err) {
+        this.error = err.response?.data?.message || err.message
+        throw err
+      }
     }
-  }
-
-  const deleteProduct = async (id) => {
-    // TODO: Replace with API DELETE
-    products.value = products.value.filter((p) => p.id !== id)
-  }
-
-  return {
-    products,
-    fetchProducts,
-    addProduct,
-    updateProduct,
-    deleteProduct,
   }
 })

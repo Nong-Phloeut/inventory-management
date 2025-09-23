@@ -33,36 +33,50 @@
 </template>
 
 <script setup>
-  import { ref } from 'vue'
-  import { useProductStore } from '@/stores/productStore'
-  import ProductDialog from '@/components/ProductDialog.vue'
+import { ref, onMounted } from 'vue'
+import { useProductStore } from '@/stores/productStore'
+import ProductDialog from '@/components/ProductDialog.vue'
 
-  const productStore = useProductStore()
+const productStore = useProductStore()
 
-  const headers = [
-    { title: 'Name', key: 'name' },
-    { title: 'SKU', key: 'sku' },
-    { title: 'Stock', key: 'stock' },
-    { title: 'Price', key: 'price' },
-    { title: 'Actions', key: 'actions', sortable: false }
-  ]
+const headers = [
+  { title: 'Name', key: 'name' },
+  { title: 'SKU', key: 'sku' },
+  { title: 'Stock', key: 'stock' },
+  { title: 'Price', key: 'price' },
+  { title: 'Actions', key: 'actions', sortable: false },
+]
 
-  const isDialogOpen = ref(false)
-  const selectedProduct = ref(null)
+const isDialogOpen = ref(false)
+const selectedProduct = ref(null)
 
-  const openAddDialog = () => {
-    selectedProduct.value = null
-    isDialogOpen.value = true
+// fetch products when page loads
+onMounted(() => {
+  productStore.fetchProducts()
+})
+
+const openAddDialog = () => {
+  selectedProduct.value = null
+  isDialogOpen.value = true
+}
+
+const openEditDialog = (p) => {
+  selectedProduct.value = { ...p }
+  isDialogOpen.value = true
+}
+
+const saveProduct = async (p) => {
+  if (p.id) {
+    await productStore.updateProduct(p)
+  } else {
+    await productStore.addProduct(p)
   }
-  const openEditDialog = p => {
-    selectedProduct.value = { ...p }
-    isDialogOpen.value = true
+  isDialogOpen.value = false
+}
+
+const deleteProduct = async (p) => {
+  if (confirm(`Delete "${p.name}"?`)) {
+    await productStore.deleteProduct(p.id)
   }
-  const saveProduct = p => {
-    p.id ? productStore.updateProduct(p) : productStore.addProduct(p)
-    isDialogOpen.value = false
-  }
-  const deleteProduct = p => {
-    if (confirm(`Delete "${p.name}"?`)) productStore.deleteProduct(p.id)
-  }
+}
 </script>

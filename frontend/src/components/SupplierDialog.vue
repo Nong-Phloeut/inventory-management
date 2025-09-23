@@ -47,7 +47,13 @@
 
   const internalOpen = ref(false)
 
-  const form = ref({ id: null, name: '', contact_name: '', phone: '', email: '' })
+  const form = ref({
+    id: null,
+    name: '',
+    contact_name: '',
+    phone: '',
+    email: ''
+  })
 
   const resetForm = () => {
     form.value = { id: null, name: '', contact_name: '', phone: '', email: '' }
@@ -77,6 +83,7 @@
 
   const save = () => {
     emit('save', { ...form.value })
+    resetForm()
     close()
   }
 </script>

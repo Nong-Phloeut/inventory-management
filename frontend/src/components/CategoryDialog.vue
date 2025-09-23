@@ -13,11 +13,7 @@
             :rules="[rules.required]"
             required
           />
-          <v-textarea
-            v-model="form.description"
-            label="Description"
-            rows="3"
-          />
+          <v-textarea v-model="form.description" label="Description" rows="3" />
         </v-form>
       </v-card-text>
 
@@ -31,56 +27,57 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+  import { ref, watch } from 'vue'
 
-const props = defineProps({
-  modelValue: Boolean,
-  category: { type: Object, default: null }
-})
-const emit = defineEmits(['update:modelValue', 'save'])
-
-const internalOpen = ref(false)
-const form = ref({ id: null, name: '', description: '' })
-const formRef = ref(null)
-const isValid = ref(false)
-
-const rules = {
-  required: (v) => !!v || 'This field is required'
-}
-
-watch(
-  () => props.modelValue,
-  (val) => (internalOpen.value = val),
-  { immediate: true }
-)
-
-watch(internalOpen, (val) => emit('update:modelValue', val))
-
-const resetForm = () => {
-  form.value = { id: null, name: '', description: '' }
-  isValid.value = false
-}
-
-watch(
-  () => props.category,
-  (newVal) => {
-    if (newVal) {
-      form.value = { ...newVal }
-    } else {
-      resetForm()
-    }
-  },
-  { immediate: true }
-)
-
-const close = () => (internalOpen.value = false)
-
-const save = () => {
-  formRef.value?.validate().then((success) => {
-    if (success) {
-      emit('save', { ...form.value })
-      close()
-    }
+  const props = defineProps({
+    modelValue: Boolean,
+    category: { type: Object, default: null }
   })
-}
+  const emit = defineEmits(['update:modelValue', 'save'])
+
+  const internalOpen = ref(false)
+  const form = ref({ id: null, name: '', description: '' })
+  const formRef = ref(null)
+  const isValid = ref(false)
+
+  const rules = {
+    required: v => !!v || 'This field is required'
+  }
+
+  watch(
+    () => props.modelValue,
+    val => (internalOpen.value = val),
+    { immediate: true }
+  )
+
+  watch(internalOpen, val => emit('update:modelValue', val))
+
+  const resetForm = () => {
+    form.value = { id: null, name: '', description: '' }
+    isValid.value = false
+  }
+
+  watch(
+    () => props.category,
+    newVal => {
+      if (newVal) {
+        form.value = { ...newVal }
+      } else {
+        resetForm()
+      }
+    },
+    { immediate: true }
+  )
+
+  const close = () => (internalOpen.value = false)
+
+  const save = () => {
+    formRef.value?.validate().then(success => {
+      if (success) {
+        emit('save', { ...form.value })
+        resetForm()
+        close()
+      }
+    })
+  }
 </script>
