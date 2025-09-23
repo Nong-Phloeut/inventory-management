@@ -102,12 +102,15 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-frontend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/inventory-webserver:latest
 
-            # Start containers fresh
+            # Stop containers but KEEP volumes (no -v)
+            docker compose down --remove-orphans || true
+
+            # Start containers with existing volumes
             docker compose up -d --remove-orphans
 
-            # Wait for DB before migrations (15s)
-            sleep 15
+            # Wait for DB before migrations (20s)
+            sleep 20
 
             # Run migrations
             docker compose exec backend php artisan migrate --force
-            docker compose exec backend php artisan db:seed --force
+            # docker compose exec backend php artisan db:seed --force
