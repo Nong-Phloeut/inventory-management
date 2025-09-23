@@ -68,10 +68,12 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            echo ">>> Removing all Docker containers, images, networks, and volumes..."
+            echo ">>> Removing old containers & images but KEEPING volumes..."
             cd ~/inventory || true
-            docker compose down -v --remove-orphans || true
-            docker system prune -a -f || true
+            docker compose down --remove-orphans || true
+            docker image prune -af || true   # only images, not volumes
+            docker container prune -f || true
+            docker network prune -f || true
 
             rm -rf ~/inventory/docker-compose.yml
             mkdir -p ~/inventory
