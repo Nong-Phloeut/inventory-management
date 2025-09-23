@@ -71,6 +71,11 @@
           icon: 'mdi-swap-horizontal'
         },
         {
+          path: '/purchases',
+          title: 'Purchases',
+          icon: 'mdi-cart-arrow-down'
+        },
+        {
           path: '/list-users',
           title: 'Staff Management',
           icon: 'mdi-account'

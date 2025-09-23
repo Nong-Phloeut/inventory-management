@@ -74,81 +74,70 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import Chart from 'chart.js/auto'
+import { useDashboardStore } from '@/stores/dashboardStore'
 
-const totalProducts = 1200
-const inStock = 950
-const lowStock = 20
-
-// Chart Ref
+const dashboardStore = useDashboardStore()
 const barChartCanvas = ref(null)
 let barChartInstance = null
 
-const cards = ref([
-  { title: 'Total Products', value: totalProducts, icon: 'mdi-cube-outline', color: 'blue-grey' },
-  { title: 'In Stock', value: inStock, icon: 'mdi-warehouse', color: 'success' },
-  { title: 'Low Stock', value: lowStock, icon: 'mdi-alert-circle-outline', color: 'warning' },
-  { title: 'Suppliers', value: 35, icon: 'mdi-truck', color: 'purple' }
-])
+const search = ref('')
 
-const lowStockItems = ref([
-  { name: 'Product A', stock: 3, category: 'Electronics' },
-  { name: 'Product B', stock: 2, category: 'Furniture' },
-  { name: 'Product C', stock: 1, category: 'Stationery' }
-])
-
-const tableHeaders = ref([
-  { title: 'Product', value: 'name' },
-  { title: 'Stock', value: 'stock' },
-  { title: 'Category', value: 'category' }
-])
-
-const stockByCategory = ref({
-  labels: ['Electronics', 'Furniture', 'Stationery'],
-  datasets: [
-    {
-      label: 'Stock',
-      data: [500, 300, 150],
-      backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726'],
-      borderColor: ['#42A5F5', '#66BB6A', '#FFA726'],
-      borderWidth: 1
-    }
-  ]
+onMounted(async () => {
+  await dashboardStore.fetchStats()
+  renderBarChart()
 })
 
+watch(
+  () => dashboardStore.stats?.stockByCategory,
+  () => renderBarChart()
+)
+
 function renderBarChart() {
-  if (!barChartCanvas.value) return
+  if (!barChartCanvas.value || !dashboardStore.stats?.stockByCategory) return
   if (barChartInstance) barChartInstance.destroy()
 
   const ctx = barChartCanvas.value.getContext('2d')
   barChartInstance = new Chart(ctx, {
     type: 'bar',
-    data: stockByCategory.value, // ✅ Full object with labels & datasets
+    data: dashboardStore.stats.stockByCategory,
     options: {
       responsive: true,
-      maintainAspectRatio: false, // prevents chart from being too tall
-      scales: {
-        y: { beginAtZero: true }
-      }
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } }
     }
   })
 }
 
-onMounted(async () => {
-  renderBarChart()
+// Cards
+const cards = computed(() => {
+  if (!dashboardStore.stats) return []
+  return [
+    { title: 'Total Products', value: dashboardStore.stats.totalProducts, icon: 'mdi-cube-outline', color: 'blue-grey' },
+    { title: 'In Stock', value: dashboardStore.stats.inStock, icon: 'mdi-warehouse', color: 'success' },
+    { title: 'Low Stock', value: dashboardStore.stats.lowStock, icon: 'mdi-alert-circle-outline', color: 'warning' },
+    { title: 'Suppliers', value: dashboardStore.stats.suppliers, icon: 'mdi-truck', color: 'purple' }
+  ]
 })
 
-// Search
-const search = ref('')
+// Low stock items
 const filteredLowStockItems = computed(() => {
-  if (!search.value) return lowStockItems.value
+  if (!dashboardStore.stats) return []
+  if (!search.value) return dashboardStore.stats.lowStockItems
   const term = search.value.toLowerCase()
-  return lowStockItems.value.filter(
+  return dashboardStore.stats.lowStockItems.filter(
     i => i.name.toLowerCase().includes(term) || i.category.toLowerCase().includes(term)
   )
 })
+
+const tableHeaders = [
+  { title: 'Product', key: 'name' },
+  { title: 'Stock', key: 'stock' },
+  { title: 'Category', key: 'category' }
+]
 </script>
+
 <style scoped>
   /* Custom CSS to improve spacing and typography */
   .v-card {

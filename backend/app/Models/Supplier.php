@@ -15,8 +15,8 @@ class Supplier extends Model
     ];
 
     // A supplier can have many purchases
-    // public function purchases()
-    // {
-    //     return $this->hasMany(Purchase::class);
-    // }
+    public function purchases()
+    {
+        return $this->hasMany(Purchase::class);
+    }
 }
