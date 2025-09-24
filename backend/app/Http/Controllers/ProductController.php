@@ -24,7 +24,6 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
             'sku' => 'required|string|max:100|unique:products',
             'category_id' => 'nullable|exists:categories,id',
         ]);
@@ -51,7 +50,6 @@ class ProductController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'sometimes|required|numeric|min:0',
-            'stock' => 'sometimes|required|integer|min:0',
             'sku' => 'sometimes|required|string|max:100|unique:products,sku,' . $product->id,
             'category_id' => 'nullable|exists:categories,id',
         ]);

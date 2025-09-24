@@ -14,13 +14,20 @@ class DashboardController extends Controller
         // 1. Total products
         $totalProducts = Product::count();
 
-        // 2. Total stock quantity
-        $inStock = Stock::sum('quantity');
+        // 2. Total stock quantity (sum of all stock movements per product)
+        $inStock = DB::table('stocks')->sum('quantity');
 
         // 3. Low stock items (threshold < 5)
-        $lowStockProducts = Product::with('stock', 'category')
-            ->whereHas('stock', fn($q) => $q->where('quantity', '<', 5))
+        $lowStockProducts = Product::with('category')
+            ->select('products.*')
+            ->selectSub(function ($query) {
+                $query->from('stocks')
+                    ->selectRaw('COALESCE(SUM(quantity), 0)')
+                    ->whereColumn('stocks.product_id', 'products.id');
+            }, 'current_stock')
+            ->having('current_stock', '<', 5)
             ->get();
+
         $lowStock = $lowStockProducts->count();
 
         // 4. Supplier count
@@ -29,8 +36,8 @@ class DashboardController extends Controller
         // 5. Stock grouped by category
         $stockByCategory = DB::table('categories')
             ->join('products', 'products.category_id', '=', 'categories.id')
-            ->join('stocks', 'stocks.product_id', '=', 'products.id')
-            ->select('categories.name as category', DB::raw('SUM(stocks.quantity) as total'))
+            ->leftJoin('stocks', 'stocks.product_id', '=', 'products.id')
+            ->select('categories.name as category', DB::raw('COALESCE(SUM(stocks.quantity), 0) as total'))
             ->groupBy('categories.name')
             ->get();
 
@@ -42,7 +49,7 @@ class DashboardController extends Controller
             'suppliers' => $suppliers,
             'lowStockItems' => $lowStockProducts->map(fn($p) => [
                 'name' => $p->name,
-                'stock' => $p->stock->quantity ?? 0,
+                'stock' => $p->current_stock,
                 'category' => $p->category->name ?? 'Uncategorized'
             ]),
             'stockByCategory' => [

@@ -22,7 +22,6 @@
             :rules="[rules.required]"
           />
           <v-text-field v-model="form.sku" label="SKU" />
-          <v-text-field v-model="form.stock" label="Stock" type="number" />
           <v-text-field v-model="form.price" label="Price" type="number" />
         </v-form>
       </v-card-text>
@@ -55,14 +54,18 @@
     id: null,
     name: '',
     sku: '',
-    stock: 0,
     price: 0
   })
 
   const rules = {
     required: v => !!v || 'This field is required'
   }
-
+  // 🧹 Reset form
+  const resetForm = () => {
+    form.value = { id: null, name: '', sku: '', price: 0 }
+    isValid.value = false
+    formRef.value?.resetValidation()
+  }
   // 🔄 Sync with parent
   watch(
     () => props.isOpen,
@@ -82,13 +85,6 @@
 
   // 🔄 Emit back
   watch(internalOpen, val => emit('update:isOpen', val))
-
-  // 🧹 Reset form
-  const resetForm = () => {
-    form.value = { id: null, name: '', sku: '', stock: 0, price: 0 }
-    isValid.value = false
-    formRef.value?.resetValidation()
-  }
 
   const close = () => {
     internalOpen.value = false
