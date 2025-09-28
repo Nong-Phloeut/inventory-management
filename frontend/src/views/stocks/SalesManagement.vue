@@ -5,9 +5,9 @@
 </template>
 
 <script setup>
-import { useSalesStore } from '@/stores/salesStore'
+// import { useSalesStore } from '@/stores/salesStore'
 
-const salesStore = useSalesStore()
+// const salesStore = useSalesStore()
 
 const headers = [
   { title: 'Invoice No', key: 'invoice' },

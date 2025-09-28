@@ -13,6 +13,7 @@
       <v-btn
         icon="mdi-pencil"
         size="small"
+        class="me-2"
         color="primary"
         @click="openEditDialog(item)"
       />

@@ -60,6 +60,12 @@ const routes = [
         name: 'Reports',
         component: () => import('@/views/stocks/ReportManagement.vue'),
         meta: { requiresAuth: true }
+      },
+      {
+        path: '/sales',
+        name: 'Sales',
+        component: () => import('@/views/stocks/SalesManagement.vue'),
+        meta: { requiresAuth: true }
       }
     ]
   }

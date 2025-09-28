@@ -77,12 +77,17 @@
         },
         {
           path: '/list-users',
-          title: 'Staff Management',
+          title: 'Staff',
           icon: 'mdi-account'
         },
         {
           path: '/reports',
           title: 'Report',
+          icon: 'mdi-chart-line'
+        },
+        {
+          path: '/sales',
+          title: 'Sales',
           icon: 'mdi-chart-line'
         }
       ]

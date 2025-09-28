@@ -14,10 +14,19 @@
     :headers="headers"
   >
     <template #item.actions="{ item }">
-      <v-btn size="small" @click="openEditDialog(item)">Edit</v-btn>
-      <v-btn size="small" color="error" @click="openDeleteDialog(item)">
-        Delete
-      </v-btn>
+      <v-btn
+        icon="mdi-pencil"
+        size="small"
+        color="primary"
+        class="me-2"
+        @click="openEditDialog(item)"
+      />
+      <v-btn
+        icon="mdi-delete"
+        size="small"
+        color="error"
+        @click="openDeleteDialog(item)"
+      />
     </template>
   </v-data-table>
 

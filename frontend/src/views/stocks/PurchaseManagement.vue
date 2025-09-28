@@ -10,8 +10,23 @@
     :headers="headers"
     :items="purchaseStore.purchases"
     item-key="id"
-    @click:row="editPurchase"
-  />
+    hover
+    >
+    <template #item.actions="{ item }">
+      <v-btn
+        icon="mdi-pencil"
+        size="small"
+        color="primary"
+        @click="editPurchase(item)"
+      />
+      <!-- <v-btn
+        icon="mdi-delete"
+        size="small"
+        color="error"
+        @click="deleteProduct(item)"
+      /> -->
+    </template>
+  </v-data-table>
 
   <PurchaseDialog
     v-if="isDialogOpen"
@@ -35,7 +50,8 @@
     { title: 'Invoice No', key: 'invoice_number' },
     { title: 'Supplier', key: 'supplier.name' },
     { title: 'Total', key: 'total_amount' },
-    { title: 'Date', key: 'purchase_date' }
+    { title: 'Date', key: 'purchase_date' },
+    { title: 'Actions', key: 'actions' }
   ]
 
   onMounted(() => {

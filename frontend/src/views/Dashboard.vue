@@ -5,7 +5,7 @@
     <!-- Top Cards -->
     <v-row class="mb-6" dense>
       <v-col v-for="card in cards" :key="card.title" cols="12" sm="6" md="3">
-        <v-card class="pa-6" :elevation="4">
+        <v-card class="card pa-6" :elevation="4">
           <v-row align="center">
             <v-col cols="8">
               <div class="text-subtitle-1">{{ card.title }}</div>
@@ -140,11 +140,11 @@ const tableHeaders = [
 
 <style scoped>
   /* Custom CSS to improve spacing and typography */
-  .v-card {
+  .card {
     border-radius: 12px;
     transition: all 0.3s ease-in-out;
   }
-  .v-card:hover {
+  .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
   }
