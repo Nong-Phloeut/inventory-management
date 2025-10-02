@@ -93,7 +93,7 @@
 
   const handleSave = async category => {
     if (category.id) {
-      await categoryStore.updateCategory(category)
+      await categoryStore.updateCategory(category.id,category)
     } else {
       await categoryStore.addCategory(category)
     }

@@ -33,14 +33,9 @@ export const useCategoryStore = defineStore('category', {
     },
 
     async updateCategory(id, data) {
-      try {
-        const res = await categoryService.update(id, data)
-        const index = this.categories.findIndex(c => c.id === id)
-        if (index !== -1) this.categories[index] = res.data
-      } catch (err) {
-        this.error = err.response?.data?.message || err.message
-        throw err
-      }
+      await categoryService.update(id, data)
+      await this.fetchCategories()
+      
     },
 
     async deleteCategory(id) {
