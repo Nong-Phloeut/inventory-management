@@ -5,9 +5,13 @@
     max-width="900"
   >
     <v-card>
-      <v-card-title>
-        {{ isEdit ? 'Edit Purchase' : 'Add Purchase' }}
-      </v-card-title>
+      <v-toolbar
+        :title="isEdit ? 'Edit Purchase' : 'Add Purchase'"
+        class="bg-primary"
+      >
+        <v-spacer />
+        <v-btn icon="mdi-close" @click="close"></v-btn>
+      </v-toolbar>
 
       <v-card-text>
         <v-form ref="formRef" v-model="valid">

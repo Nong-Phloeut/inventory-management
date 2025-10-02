@@ -26,8 +26,10 @@
         <v-col cols="12" md="3">
           <v-select
             v-model="filters.category"
-            :items="categories"
+            :items="categoryStore.categories"
             label="Category"
+            item-title="name"
+            item-value="id"
             density="compact"
             clearable
             hide-details
@@ -101,6 +103,8 @@
 <script setup>
   import { ref, onMounted } from 'vue'
   import Chart from 'chart.js/auto'
+  import { useCategoryStore } from '@/stores/categoryStore'
+  const categoryStore = useCategoryStore()
 
   const filters = ref({
     from: '',
@@ -232,6 +236,7 @@
 
   onMounted(() => {
     renderCharts()
+    categoryStore.fetchCategories()
   })
 </script>
 

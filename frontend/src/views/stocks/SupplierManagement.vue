@@ -19,12 +19,14 @@
         size="small"
         color="primary"
         class="me-2"
+        variant="tonal"
         @click="openEditDialog(item)"
       />
       <v-btn
         icon="mdi-delete"
         size="small"
         color="error"
+        variant="tonal"
         @click="openDeleteDialog(item)"
       />
     </template>
@@ -43,7 +45,8 @@
       <v-card-title>Confirm Delete</v-card-title>
       <v-card-text>
         Are you sure you want to delete
-        <strong>{{ selectedSupplier?.name }}</strong>?
+        <strong>{{ selectedSupplier?.name }}</strong>
+        ?
       </v-card-text>
       <v-card-actions>
         <v-spacer />
@@ -57,62 +60,62 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useSupplierStore } from '@/stores/supplierStore'
-import SupplierDialog from '@/components/SupplierDialog.vue'
+  import { ref, onMounted } from 'vue'
+  import { useSupplierStore } from '@/stores/supplierStore'
+  import SupplierDialog from '@/components/SupplierDialog.vue'
 
-const supplierStore = useSupplierStore()
+  const supplierStore = useSupplierStore()
 
-// State
-const isDialogOpen = ref(false)
-const isDeleteDialogOpen = ref(false)
-const selectedSupplier = ref(null)
+  // State
+  const isDialogOpen = ref(false)
+  const isDeleteDialogOpen = ref(false)
+  const selectedSupplier = ref(null)
 
-// Table headers
-const headers = [
-  { title: 'Name', key: 'name' },
-  { title: 'Contact', key: 'contact_name' },
-  { title: 'Phone', key: 'phone' },
-  { title: 'Email', key: 'email' },
-  { title: 'Actions', key: 'actions', sortable: false }
-]
+  // Table headers
+  const headers = [
+    { title: 'Name', key: 'name' },
+    { title: 'Contact', key: 'contact_name' },
+    { title: 'Phone', key: 'phone' },
+    { title: 'Email', key: 'email' },
+    { title: 'Actions', key: 'actions', sortable: false }
+  ]
 
-// Load suppliers on mount
-onMounted(() => {
-  supplierStore.fetchSuppliers()
-})
+  // Load suppliers on mount
+  onMounted(() => {
+    supplierStore.fetchSuppliers()
+  })
 
-// Open add dialog
-const openAddDialog = () => {
-  selectedSupplier.value = null
-  isDialogOpen.value = true
-}
-
-// Open edit dialog
-const openEditDialog = (supplier) => {
-  selectedSupplier.value = { ...supplier }
-  isDialogOpen.value = true
-}
-
-// Open delete dialog
-const openDeleteDialog = (supplier) => {
-  selectedSupplier.value = supplier
-  isDeleteDialogOpen.value = true
-}
-
-// Save (add or update)
-const handleSave = async (supplier) => {
-  if (supplier.id) {
-    await supplierStore.updateSupplier(supplier)
-  } else {
-    await supplierStore.addSupplier(supplier)
+  // Open add dialog
+  const openAddDialog = () => {
+    selectedSupplier.value = null
+    isDialogOpen.value = true
   }
-  isDialogOpen.value = false
-}
 
-// Delete
-const handleDelete = async (id) => {
-  await supplierStore.removeSupplier(id) // 🔹 use removeSupplier (store)
-  isDeleteDialogOpen.value = false
-}
+  // Open edit dialog
+  const openEditDialog = supplier => {
+    selectedSupplier.value = { ...supplier }
+    isDialogOpen.value = true
+  }
+
+  // Open delete dialog
+  const openDeleteDialog = supplier => {
+    selectedSupplier.value = supplier
+    isDeleteDialogOpen.value = true
+  }
+
+  // Save (add or update)
+  const handleSave = async supplier => {
+    if (supplier.id) {
+      await supplierStore.updateSupplier(supplier)
+    } else {
+      await supplierStore.addSupplier(supplier)
+    }
+    isDialogOpen.value = false
+  }
+
+  // Delete
+  const handleDelete = async id => {
+    await supplierStore.removeSupplier(id) // 🔹 use removeSupplier (store)
+    isDeleteDialogOpen.value = false
+  }
 </script>

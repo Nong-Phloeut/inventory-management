@@ -1,10 +1,13 @@
 <template>
   <v-dialog v-model="internalOpen" max-width="600">
     <v-card>
-      <v-card-title>
-        {{ form.id ? 'Edit Product' : 'Add Product' }}
-      </v-card-title>
-
+       <v-toolbar
+        :title="form.id ? 'Edit Product' : 'Add Product'"
+        class="bg-primary"
+      >
+        <v-spacer />
+        <v-btn icon="mdi-close" @click="close"></v-btn>
+      </v-toolbar>
       <v-card-text>
         <v-form ref="formRef" v-model="isValid">
           <v-text-field

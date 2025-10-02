@@ -1,60 +1,93 @@
 <template>
-  <custom-title icon="mdi-account">
-    Staff Management
+  <custom-title icon="mdi-account-group">
+    User Management
     <template #right>
-      <v-btn
-        class="bg-primary"
-        append-icon="mdi-database-import"
-        @click="showDialog = true"
-      >
-        Create user
-      </v-btn>
+      <BaseButton icon="mdi-plus" @click="openDialog">Add Employee</BaseButton>
     </template>
   </custom-title>
+  <v-container fluid class="pa-0">
+    <v-data-table
+      :items="employeeStore.employees"
+      :headers="headers"
+      :loading="employeeStore.loading"
+      class="mt-4"
+    >
+      <template #item.name="{ item }">
+        {{ item.first_name }} {{ item.last_name }}
+      </template>
 
-  <v-data-table
-    :headers="headers"
-    :items="desserts"
-    :search="search"
-  ></v-data-table>
+      <template #item.actions="{ item }">
+        <v-btn size="small" variant="tonal" icon @click="edit(item)">
+          <v-icon>mdi-pencil</v-icon>
+        </v-btn>
+        <v-btn
+          size="small"
+          variant="tonal"
+          icon
+          color="red"
+          class="ms-2"
+          @click="remove(item.id)"
+        >
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
+      </template>
+    </v-data-table>
 
-  <!-- Create User Dialog -->
-  <CreateUserDialog v-model="showDialog" @create="handleCreateUser" />
+    <!-- Dialog for create/edit -->
+    <employee-dialog
+      v-model="dialog"
+      :employee="selectedEmployee"
+      @save="saveEmployee"
+    />
+  </v-container>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import CreateUserDialog from '../../components/CreateUserDialog.vue'
+  import { ref, onMounted } from 'vue'
+  import { useEmployeeStore } from '@/stores/employeeStore'
+  import EmployeeDialog from '@/components/EmployeeDialog.vue'
 
-// Reactive state
-const search = ref('')
-const showDialog = ref(false)
+  const employeeStore = useEmployeeStore()
 
-const headers = [
-  { align: 'start', key: 'name', sortable: false, title: 'Dessert (100g serving)' },
-  { key: 'calories', title: 'Calories' },
-  { key: 'fat', title: 'Fat (g)' },
-  { key: 'carbs', title: 'Carbs (g)' },
-  { key: 'protein', title: 'Protein (g)' },
-  { key: 'iron', title: 'Iron (%)' }
-]
+  const dialog = ref(false)
+  const selectedEmployee = ref(null)
 
-const desserts = ref([
-  { name: 'Frozen Yogurt', calories: 159, fat: 6.0, carbs: 24, protein: 4.0, iron: 1 },
-  { name: 'Ice cream sandwich', calories: 237, fat: 9.0, carbs: 37, protein: 4.3, iron: 1 },
-  { name: 'Eclair', calories: 262, fat: 16.0, carbs: 23, protein: 6.0, iron: 7 },
-  { name: 'Cupcake', calories: 305, fat: 3.7, carbs: 67, protein: 4.3, iron: 8 },
-  { name: 'Gingerbread', calories: 356, fat: 16.0, carbs: 49, protein: 3.9, iron: 16 },
-  { name: 'Jelly bean', calories: 375, fat: 0.0, carbs: 94, protein: 0.0, iron: 0 },
-  { name: 'Lollipop', calories: 392, fat: 0.2, carbs: 98, protein: 0, iron: 2 },
-  { name: 'Honeycomb', calories: 408, fat: 3.2, carbs: 87, protein: 6.5, iron: 45 },
-  { name: 'Donut', calories: 452, fat: 25.0, carbs: 51, protein: 4.9, iron: 22 },
-  { name: 'KitKat', calories: 518, fat: 26.0, carbs: 65, protein: 7, iron: 6 }
-])
+  const headers = [
+    { title: 'ID', key: 'employee_id' },
+    { title: 'Name', key: 'name' },
+    { title: 'Email', key: 'email' },
+    { title: 'Phone', key: 'phone' },
+    { title: 'Department', key: 'department' },
+    { title: 'Job Title', key: 'job_title' },
+    { title: 'Status', key: 'status' },
+    { title: 'Actions', key: 'actions', sortable: false }
+  ]
 
-// Methods
-function handleCreateUser(user) {
-  console.log('Created user:', user)
-  // Call API here to save the user
-}
+  onMounted(() => {
+    employeeStore.fetchEmployees()
+  })
+
+  function openDialog() {
+    selectedEmployee.value = null
+    dialog.value = true
+  }
+
+  function edit(emp) {
+    selectedEmployee.value = { ...emp }
+    dialog.value = true
+  }
+
+  async function saveEmployee(employee) {
+    if (employee.id) {
+      await employeeStore.updateEmployee(employee.id, employee)
+    } else {
+      await employeeStore.createEmployee(employee)
+    }
+  }
+
+  async function remove(id) {
+    if (confirm('Are you sure you want to delete this employee?')) {
+      await employeeStore.deleteEmployee(id)
+    }
+  }
 </script>

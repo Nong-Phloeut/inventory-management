@@ -77,7 +77,7 @@
         },
         {
           path: '/list-users',
-          title: 'Staff',
+          title: 'Employees',
           icon: 'mdi-account'
         },
         {

@@ -15,12 +15,14 @@
         size="small"
         class="me-2"
         color="primary"
+        variant="tonal"
         @click="openEditDialog(item)"
       />
       <v-btn
         icon="mdi-delete"
         size="small"
         color="error"
+        variant="tonal"
         @click="deleteProduct(item)"
       />
     </template>
@@ -45,6 +47,7 @@
     { title: 'Name', key: 'name' },
     { title: 'SKU', key: 'sku' },
     { title: 'Price', key: 'price' },
+    { title: 'Created At', key: 'created_at' },
     { title: 'Actions', key: 'actions', sortable: false }
   ]
 

@@ -17,6 +17,7 @@
         icon="mdi-pencil"
         size="small"
         color="primary"
+        variant="tonal"
         @click="editPurchase(item)"
       />
       <!-- <v-btn

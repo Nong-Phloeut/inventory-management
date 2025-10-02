@@ -19,12 +19,14 @@
         class="me-2"
         color="primary"
         icon="mdi-pencil"
+        variant="tonal"
         @click="openEditDialog(item)"
       ></v-btn>
       <v-btn
         size="small"
         icon="mdi-delete"
         color="error"
+        variant="tonal"
         @click="openDeleteDialog(item)"
       ></v-btn>
     </template>
